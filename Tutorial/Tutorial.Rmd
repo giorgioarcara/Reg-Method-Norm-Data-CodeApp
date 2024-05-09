@@ -1,0 +1,116 @@
+---
+title: "Arcara 2024 - Regression Method<br>for normative data - Tutorial"
+output:
+  html_document: default
+  word_document: default
+date: "2024-03-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## Introduction
+
+This tutorials explain how to use the code for applying the method in *Arcara G.(2024) Improving Equivalent scores: a new method for regression model selection.* 
+
+## Set up R
+To work with the method you need to load some functions that will be used. Here I included all the required functions in a folder called `R functions` (these will be wrapped in an R package in the future).
+
+```{r wd, echo=FALSE}
+setwd( "/Users/giorgioarcara/Documents/Lavori Personali/Improving ES/Reg-Method-Norm-Data-CodeApp/")
+```
+
+```{r functions}
+source("R_functions/adjscores_A2024_v3.R")
+source("R_functions/formula_transf_text.R")
+source("R_functions/model_transf_text.R")
+source("R_functions/transf_functions.R")
+source("R_functions/tolLimits.adjscores.R")
+source("R_functions/tolLimits.obs.R")
+source("R_functions/ES.R")
+
+```
+
+I then load some required packages. 
+
+```{r packages, results="markup"}
+require(effects)
+require(car)
+require(performance)
+```
+
+## Import data
+
+In the following lines I import the data and make some check everything is ok
+
+```{r pressure, echo=TRUE}
+Test.dat = read.csv("Original_Data/MOCA_Dataset.csv", sep=",", dec=".")
+
+dim(Test.dat)
+
+head(Test.dat)
+
+str(Test.dat)
+
+# fix values for participants with zero Education otherwise some transformations (e.g. 1/x, log) could give inappropriate results
+Test.dat[Test.dat$Education==0, "Education"] = 1
+
+Test.dat = na.omit(Test.dat)
+
+```
+
+## Use the method to select regression model
+
+```{r method}
+Test.ARC.res = adjscores_A2024(df = Test.dat, dep="Score", 
+                             age="Age", edu="Education", sex="Sex",
+                             dep.range = c(0, 100))
+```
+
+Inspect model results. The results is a list of objects (see `adjscores_A2024.R` file for details):
+
+* the first is a dataset in which a new column with adjusted scores is added
+
+```{r dataset}
+head(Test.ARC.res$new.df)
+```
+
+* the second is the linear model estimated (here I use `summary` to better inspect the model) and I plot the partial effects
+
+```{r lm}
+summary(Test.ARC.res$lm.model)
+plot(allEffects(Test.ARC.res[[2]], partial.residuals=TRUE))
+``` 
+
+
+* I can also print the final formula
+```{r formula}
+print(Test.ARC.res$model_text)
+```
+
+# Model diagnositc
+An appropriate model selection should also include some diagnostics
+```{r diagnostic}
+check_model(Test.ARC.res$lm.model)
+# some disomogeneity in variance, but overall a good fit
+```
+
+
+# Calculate Equivalent Scores
+
+To calculate thresholds for Equivalent Scores I can use some some few additional code.
+
+```{r ES}
+Test.ES = ES(adjscores=Test.ARC.res$new.df$ADJ_SCORES)
+
+print(Test.ES)
+```
+
+# Citing the Method
+If you use the regression method script please cite: 
+*Arcara G. (2024) Improving Equivalent Scores: A new method for regression model selection*
+
+If you use the ES, please cite: 
+*Aiello, E. N., & Depaoli, E. G. (2022). Norms and standardizations in neuropsychology via equivalent scores: software solutions and practical guides. Neurological Sciences, 43(2), 961-966.*
+
