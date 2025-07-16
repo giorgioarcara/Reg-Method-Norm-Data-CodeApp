@@ -57,7 +57,7 @@ adj_scores_transf_text = function(mod, transfs=NULL, transfs.names =NULL, new.na
     mean_value = predict(mod, newdata=mean_dat)
     
     
-    model_res = paste("Adj score =", round(mean_value, digits), " - [", model_res, "]", sep="") 
+    model_res = paste("Adj score = ", round(mean_value, digits), " - [", model_res, "]", sep="") 
     
   }
   if (length(coefs)==1){
