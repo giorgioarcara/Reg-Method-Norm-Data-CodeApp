@@ -31,13 +31,14 @@ adjscores_A2024 <- function(df = NULL, dep = "Dep", dep.range = c(0,30), age = "
   
   dat = na.omit(dat)
   
-  #
-  # if(!is.numeric(dat$sex)){
-  #dat$sex = factor(dat$sex)
+  # convert sex to numeric
+   if(!is.numeric(dat$sex)){
+  dat$sex = factor(dat$sex)
+  dat$sex.or = dat$sex
   
-  #dat$sex.n = ifelse(dat$sex==levels(dat$sex)[1], 1, 0)
-  #cat("Sex converted to numeric")
-  #}
+  dat$sex= ifelse(dat$sex==levels(dat$sex)[1], 1, 0)
+  cat("Sex converted to numeric")
+  }
   
   #compute most common transformations for age and education
   cube = function(x){x^3}
