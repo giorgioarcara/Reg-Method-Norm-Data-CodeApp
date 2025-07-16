@@ -147,8 +147,8 @@ adjscores_A2024 <- function(df = NULL, dep = "Dep", dep.range = c(0,30), age = "
   }
   
   # predict mean value to calculate adjusted score capitani way.
-  age_m = mean(dat$age)
-  edu_m = mean(dat$edu)
+  age_m = mean(dat$Age)
+  edu_m = mean(dat$Education)
   sex_m = 0.5
   mean_dat = data.frame(age=age_m, edu=edu_m, sex=sex_m)
   names(mean_dat)=c(age, edu, sex) # to restore correct name

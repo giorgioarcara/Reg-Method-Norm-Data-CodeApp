@@ -59,10 +59,10 @@ ui <- fluidPage(
       br(),
       HTML("This shiny app accompanies the article  Arcara G. (2024) 'Improving Equivalent Scores: a new regression method'<br><br>"),
       HTML("<b>Instructions</b>: The .CSV File supplied should have <code>,</code> as delimiter and should include the following columns:<br>",
-           "<code>Age</code>", "should be a numerical variable<br>",
-           "<code>Education</code> as a numerical variable<br>",
-           "<code>Sex</code> as a factor<br>", 
-           "<code>Score</code> as a numerical variable<br>"),
+           "<li><code>Age</code>", "should be a numerical variable</li>",
+           "<li><code>Education</code> as a numerical variable</li>",
+           "<li><code>Sex</code> as either 0 or 1. E.g. 0 for Males, and 1 for Females. The mapping of values (e.g., which number corresponds to which sex) should be defined clearly in your documentation or data processing pipeline.</li>", 
+           "<li><code>Score</code> as a numerical variable</li>"),
       HTML("<br><b>NOTE</b>: <br> - If you use the regression method script please cite: <i> Arcara G. (2024) Improving Equivalent Scores: A new method for regression model selection </i> <br> - If you also use the ES, please add: <i> Aiello, E. N., & Depaoli, E. G. (2022). Norms and standardizations in neuropsychology via equivalent scores: software solutions and practical guides. Neurological Sciences, 43(2), 961-966. </i>"),
       HTML("<br><br><b>WARNING</b>: Proper regression modeling should also include diagnostic inspection. Please check that the fit is appropriate.")
       
@@ -108,6 +108,8 @@ server <- function(input, output) {
             plot(NA, axes=F, frame.plot=F, ylab="", xlab="", xlim=c(-1,1), ylim=c(-1,1))
             text(0,0, "The file is not appropriate.\n Check the instructions\n", cex=1.5, font=2)
             text(0,-0.5, "The file column names should be: Age, Education, Sex, and Score", cex=1.5, font=1)
+            text(0,-1, "The .csv file must have comma ',' as field delimiter", cex=1.5, font=1)
+            
             
           } else {
             plot(NA, axes=F, frame.plot=F, ylab="", xlab="", xlim=c(-1,1), ylim=c(-1,1))
@@ -122,7 +124,9 @@ server <- function(input, output) {
             assign("ES.res", ES.res, envir=.GlobalEnv)
             
             
-            adj_text = adj_scores_transf_text(dat.res$lm.model, transfs=dat.res$transfs, transfs.names = c("age_funct", "edu_funct"), new.names=c("Age", "Edu"))
+            
+            
+            adj_text = adj_scores_transf_text(dat.res$lm.model, transfs=dat.res$transfs, transfs.names = c("age_funct", "edu_funct"), new.names=c("Age", "Edu"), dat=dat)
             assign("adj_text", adj_text, envir = .GlobalEnv)
             
             

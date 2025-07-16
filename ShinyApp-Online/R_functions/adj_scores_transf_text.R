@@ -1,21 +1,22 @@
 # interal function to transform a model into an formula for adj score (to improve readibility, e.g. "Observed score -(+ 0.8 * log(Age) + 0.002 * quadr(Edu) + 0.2 * Sex)")
 # this function can be used with the output of regressions model in which a transformation has been used
-# (e.g., in adjscores_C1987 (Capitani, 1987) or adjscores_A2023 (Arcara, 2023))
+# (e.g., in adjscores_C1987 (Capitani, 1987) or adjscores_A2024 (Arcara, 2024))
 # NOTE: the use of "transf.names" are necessary steps because adjscore_C1987, adjscores_Arcara2023 use these transformations)
 
 ## mod  = a linear model
 # transfs = the transformations OF THE MODEL, to be substituted with transf.names
 # transfs.names = the name of age function in the function
 # new.names = the new labels used to generate the formula.
+# dat =  a dataset with the following columns , Age, Education, Sex, Score (see online ShinyApp for details).
 
 
 # eg. 
 #  mod = mod_final, transfs = lm.model$transfs, transfs.names=c("age_funct", "edu_funct"); new.names=c("Age", "Edu");
 # example of the output  "12 + 0.8 * log(Age) + 0.002 * quadr(Edu) + 0.2 * Sex"
 
-# Author Giorgio Arcara (2023) v.1.0 
+# Author Giorgio Arcara (2025) v.1.1 
 
-adj_scores_transf_text = function(mod, transfs=NULL, transfs.names =NULL, new.names=NULL,  digits=3){
+adj_scores_transf_text = function(mod, transfs=NULL, transfs.names =NULL, new.names=NULL, dat=NULL, digits=3){
   
   if (length(transfs.names)!=length(new.names)|length(transfs)!=length(transfs.names)){
     stop("length of transfs, transfs.names, and transfs.names, should be the same")
@@ -46,7 +47,17 @@ adj_scores_transf_text = function(mod, transfs=NULL, transfs.names =NULL, new.na
                        paste(transfs[iN], "(",new.names[iN], ")", sep=""), model_res)
     }
    
-    model_res = paste("Adj score = Observed score - [", model_res, "]", sep="") 
+    
+    # predict mean value to calculate adjusted score capitani way.
+    # (adapted and changed from new adjscores, as from update of July 2025)
+    age_m = mean(dat$Age)
+    edu_m = mean(dat$Education)
+    sex_m = 0.5
+    mean_dat = data.frame(Age=age_m, Education=edu_m, Sex=sex_m)
+    mean_value = predict(mod, newdata=mean_dat)
+    
+    
+    model_res = paste("Adj score =", round(mean_value, digits), " - [", model_res, "]", sep="") 
     
   }
   if (length(coefs)==1){
