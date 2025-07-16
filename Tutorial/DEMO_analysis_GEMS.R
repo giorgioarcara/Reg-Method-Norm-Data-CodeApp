@@ -29,7 +29,7 @@ print(Test.ARC.res$model_text)
 Test.ARC.lm.res = Test.ARC.res$lm.model
 summary(Test.ARC.lm.res)
 
-
+# plot partial effects
 plot(allEffects(Test.ARC.lm.res, partial.residuals=T), residuals.cex=0.2)
 
 AIC(Test.ARC.lm.res)
