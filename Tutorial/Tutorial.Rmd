@@ -22,7 +22,7 @@ setwd( "/Users/giorgioarcara/Documents/Lavori Personali/Improving ES/Reg-Method-
 ```
 
 ```{r functions}
-source("R_functions/adjscores_A2024_v3.R")
+source("R_functions/adjscores_A2024_v3_mod.R")
 source("R_functions/formula_transf_text.R")
 source("R_functions/model_transf_text.R")
 source("R_functions/transf_functions.R")
@@ -53,7 +53,7 @@ head(Test.dat)
 
 str(Test.dat)
 
-# fix values for participants with zero Education otherwise some transformations (e.g. 1/x, log) could give inappropriate results
+# fix values for participants with zero Education otherwise some transformations (e.g. 1/x, log) could give issues.
 Test.dat[Test.dat$Education==0, "Education"] = 1
 
 Test.dat = na.omit(Test.dat)
@@ -92,7 +92,8 @@ print(Test.ARC.res$model_text)
 # Model diagnositc
 An appropriate model selection should also include some diagnostics
 ```{r diagnostic}
-check_model(Test.ARC.res$lm.model)
+plot(check_normality(Test.ARC.res$lm.model))
+plot(check_heteroscedasticity(Test.ARC.res$lm.model))
 # some disomogeneity in variance, but overall a good fit
 ```
 

@@ -15,7 +15,7 @@
 # transfs = the two best transformations identified for age and education.
 # model_text = a text describing the best equation.
 
-# Author: Giorgio Arcara (2024) v 1.0
+# Author: Giorgio Arcara (2024) v 1.1
 
 
 adjscores_A2024 <- function(df = NULL, dep = "Dep", dep.range = c(0,30), age = "Age", edu="Education", sex="Sex"){
@@ -109,7 +109,7 @@ adjscores_A2024 <- function(df = NULL, dep = "Dep", dep.range = c(0,30), age = "
   mod_final = step(mod_formula, trace=F)
   
   ### DROP THE NON SIGNIFICANT TERMS
-  mod = mod_formula
+  mod = mod_final
   
   mod.anova=Anova(mod, type="III")[-c(1, dim(Anova(mod, type="III"))[1]), ] #recupero i risultati ANOVA (escluso l'ultimo, residuals)
   
@@ -145,13 +145,26 @@ adjscores_A2024 <- function(df = NULL, dep = "Dep", dep.range = c(0,30), age = "
     best_edu_transf = "zero"
   }
   
+  # predict mean value to calculate adjusted score capitani way.
+  age_m = mean(dat$age)
+  edu_m = mean(dat$edu)
+  sex_m = ifelse(is.factor(dat$Sex), levels(dat$Sex)[1], 0)
+  mean_dat = data.frame(age=age_m, edu=edu_m, sex=sex_m)
+  names(mean_dat)=c(age, edu, sex) # to restore correct name
+  mean_value = predict(mod_final, newdata=mean_dat)
   
-  dat$ADJ_SCORES = residuals(mod_final)+coef(mod_final)["(Intercept)"]
+  dat$ADJ_SCORES = residuals(mod_final)+mean_value
   dat$RESIDUALS = residuals(mod_final)
   
   # uncorrect data above/equal maximum or below/equal minimum value
+  dat[dat[, dep]>=dep.range[2], "ADJ_SCORES"] = dep.range[2]
+  dat[dat[, dep]<=dep.range[1], "ADJ_SCORES"] = dep.range[1]
   dat[dat$ADJ_SCORES>=dep.range[2], "ADJ_SCORES"] = dep.range[2]
   dat[dat$ADJ_SCORES<=dep.range[1], "ADJ_SCORES"] = dep.range[1]
+  
+  # these two sets of corrections do not correct values that are initially already ad maximum or minimum, and
+  # set threshold of adj score to dep range.
+  
   
   # to improve readibility I define the returned model text here
   model_text_res = model_transf_text(mod_final,  transfs =c(best_age_transf, best_edu_transf), 

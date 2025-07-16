@@ -59,7 +59,7 @@ ES <- function(n=NULL, adjscores=NULL, lower_tail = TRUE){
     
     dat = dat[order(dat$AS), ]
     ES.s = unlist(dat[ES.n, "AS"])
-    names(ES.n)=c("ES0(oTL)-ES1", "ES1-ES2", "ES2-ES3", "ES3-ES4")
+    names(ES.s)=c("ES0(oTL)-ES1", "ES1-ES2", "ES2-ES3", "ES3-ES4")
     
     res = list(ES.n, ES.s)
     names(res) = c("Observations", "Adjusted_Scores")

@@ -20,7 +20,7 @@ Test.dat[Test.dat$Education==0, "Education"] = 1
 
 Test.dat = na.omit(Test.dat)
 
-Test.ARC.res = adjscores_A2024(df = Test.dat, dep="GEMS", 
+Test.ARC.res = adjscores_A2024(df = Test.dat, dep="Score", 
                              age="Age", edu="Education", sex="Sex",
                              dep.range = c(0, 100))
 

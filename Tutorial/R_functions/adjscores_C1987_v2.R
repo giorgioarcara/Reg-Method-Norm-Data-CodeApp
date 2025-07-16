@@ -155,13 +155,19 @@ adjscores_C1987 <- function(df = NULL, dep = "Dep", dep.range = c(0,30), age = "
   ####
   # CAPITANI'S REGRESSION METHOD END HERE
   
-
-  dat$ADJ_SCORES = residuals(mod_final)+coef(mod_final)["(Intercept)"]
+  age_m = mean(dat$age)
+  edu_m = mean(dat$edu)
+  sex_m = ifelse(is.factor(dat$Sex), levels(dat$Sex)[1], 0)
+  mean_dat = data.frame(age=age_m, edu=edu_m, sex=sex_m)
+  names(mean_dat)=c(age, edu, sex) # to restore correct name
+  mean_value = predict(mod_final, newdata=mean_dat)
+  
+  dat$ADJ_SCORES = residuals(mod_final)+mean_value
   dat$RESIDUALS = residuals(mod_final)
   
   # uncorrect data above/equal maximum or below/equal minimum value
-  dat[dat$ADJ_SCORES>=dep.range[2], "ADJ_SCORES"] = dep.range[2]
-  dat[dat$ADJ_SCORES<=dep.range[1], "ADJ_SCORES"] = dep.range[1]
+  dat[dat[, dep]>=dep.range[2], "ADJ_SCORES"] = dep.range[2]
+  dat[dat[, dep]<=dep.range[1], "ADJ_SCORES"] = dep.range[1]
   
   # NOTA GIORGIO : adjust the output: return regression and return new dataset
   # not strictly necessary for simulation, necessary for using the code
