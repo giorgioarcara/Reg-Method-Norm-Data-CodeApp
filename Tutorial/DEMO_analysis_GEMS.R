@@ -22,7 +22,7 @@ Test.dat = na.omit(Test.dat)
 
 Test.ARC.res = adjscores_A2024(df = Test.dat, dep="Score", 
                              age="Age", edu="Education", sex="Sex",
-                             dep.range = c(0, 100))
+                             dep.range = c(0, 200))
 
 print(Test.ARC.res$model_text)
 
@@ -47,6 +47,36 @@ dim(Test.dat)
 
 tolLimits.obs(n=644)
 
+
+
+# below original Aiello function
+#identifying the observations (ris) corresponding to the outer and inner tolerance limits (oTL; iTL)
+tolLimits <- function(n){
+  q <- 0.05
+  r1 <- r2 <- 0
+  p1 <- pbeta(q, shape1=r1, shape2=n-(r1+1), lower.tail=T)
+  while(p1 >= 0.95){
+    r1 <- r1+1
+    p1 <- pbeta(q, shape1=r1, shape2=n-(r1+1), lower.tail=T)
+  }
+  r1 <- r1-1
+  p1 <- pbeta(q, shape1=r1, shape2=n-(r1+1), lower.tail=T)
+  
+  p2 <- pbeta(1-q, shape1=n-(r2+1), shape2=r2, lower.tail=T)
+  while(p2<=0.95){
+    r2 <- r2+1
+    p2 <- pbeta(1-q, shape1=n-(r2+1), shape2=r2, lower.tail=T)
+  }
+  if(r1 == 0) r1 <- 'not defined'
+  return(c(paste('oTL', r1),
+           paste('iTL', r2),
+           paste('p oTL', round(p1,5)),
+           paste('p iTL', round(p2,5)))
+  )
+}
+
+
+tolLimits(644)
 
 #insert the sample size and the oTL to get the last Equivalent Scores (ESs); rounding controls are also provided
 n <- 644
@@ -94,6 +124,33 @@ ES2 == Test.ES$Observations[3]
 ES3 == Test.ES$Observations[4]
 
 
+## verifico corrispondenza ADJ_SCORES
 
+m = Test.ARC.lm.res
+
+ds = Test.ARC.res$new.df
+
+mage = mean(cube(ds$Age))
+medu = mean(log(ds$Education))
+
+ds$t_age = cube(ds$Age)
+ds$t_edu = log(ds$Education)
+
+ds$y = ds$Score
+
+bage = (coef(summary(m))[2,1])
+bedu = (coef(summary(m))[3,1])
+bsex = 0 #(coef(summary(m))[4,1])
+
+
+
+ds$PC <- ds$y-(bage)*(ds$t_age-mage)-(bedu)*(ds$t_edu-medu)-(bsex)*(ds$sex-0.5)
+
+- bage * mage - bedu * medu 
+
+ds$PC == ds$ADJ_SCORES
+
+plot(ds$PC, ds$ADJ_SCORES)
+range(ds$PC-ds$ADJ_SCORES)
 
 
