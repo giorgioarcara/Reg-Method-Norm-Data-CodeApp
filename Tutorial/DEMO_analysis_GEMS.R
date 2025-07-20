@@ -18,6 +18,9 @@ Test.dat = read.csv("Original_Data/GEMS_Dataset.csv", sep=",", dec=".")
 # fix values for participants with zero Education otherwise some transformations (e.g. 1/x, log) could give inappropriate results
 Test.dat[Test.dat$Education==0, "Education"] = 1
 
+# check with artificial effect of Sex
+Test.dat$Score[Test.dat$Sex=="F"] = Test.dat$Score[Test.dat$Sex=="F"] + 3
+
 Test.dat = na.omit(Test.dat)
 
 Test.ARC.res = adjscores_A2024(df = Test.dat, dep="Score", 
@@ -140,7 +143,7 @@ ds$y = ds$Score
 
 bage = (coef(summary(m))[2,1])
 bedu = (coef(summary(m))[3,1])
-bsex = 0 #(coef(summary(m))[4,1])
+bsex = (coef(summary(m))[4,1])
 
 
 
