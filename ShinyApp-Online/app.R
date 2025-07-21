@@ -63,9 +63,9 @@ ui <- fluidPage(
            "<li><code>Education</code> as a numerical variable</li>",
            "<li><code>Sex</code> as either 0 or 1. E.g. 0 for Males, and 1 for Females. The mapping of values (e.g., which number corresponds to which sex) should be defined clearly in your documentation or data processing pipeline.</li>", 
            "<li><code>Score</code> as a numerical variable</li>"),
-      HTML("<br><b>NOTE</b>: <br> - If you use the regression method script please cite: <i> Arcara G. (2024) Improving Equivalent Scores: A new method for regression model selection </i> <br> - If you also use the ES, please add: <i> Aiello, E. N., & Depaoli, E. G. (2022). Norms and standardizations in neuropsychology via equivalent scores: software solutions and practical guides. Neurological Sciences, 43(2), 961-966. </i>"),
-      HTML("<br><br><b>WARNING</b>: Proper regression modeling should also include diagnostic inspection. Please check that the fit is appropriate.")
-      
+      HTML("<br><b>NOTE</b>: <br> - If you use the regression method script please cite: Arcara G. (2024) Improving Equivalent Scores: A new method for regression model selection.<i>Neurological Sciences, 45(12),</i> 5685-5695<br> - If you also use the ES, please add: <i> Aiello, E. N., & Depaoli, E. G. (2022). Norms and standardizations in neuropsychology via equivalent scores: software solutions and practical guides. Neurological Sciences, 43(2), 961-966. </i>"),
+      HTML("<br><br><b>WARNING</b>: Proper regression modeling should also include diagnostic inspection. Please check that the fit is appropriate.<br>"),
+      HTML(paste("<i>Last modification:", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"),"</i>"))
     ),
   )
 )

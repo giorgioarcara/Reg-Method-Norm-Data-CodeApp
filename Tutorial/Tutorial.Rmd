@@ -2,8 +2,8 @@
 title: "Arcara 2024 - Regression Method<br>for normative data - Tutorial"
 output:
   html_document: default
-  word_document: default
   pdf_document: default
+  word_document: default
 date: "2025-07-16"
 ---
 
