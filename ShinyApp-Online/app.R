@@ -6,6 +6,8 @@
 #
 #    http://shiny.rstudio.com/
 #
+rm(list=ls())
+
 source("R_functions/adjscores_A2024_v3.R")
 source("R_functions/formula_transf_text.R")
 source("R_functions/model_transf_text.R")
@@ -23,7 +25,6 @@ library(shiny)
 require(effects)
 library(car)
 
-rm(list=ls())
 
 
 ui <- fluidPage(

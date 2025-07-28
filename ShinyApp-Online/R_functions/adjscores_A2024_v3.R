@@ -179,6 +179,9 @@ adjscores_A2024 <- function(df = NULL, dep = "Dep", dep.range = c(0,30), age = "
   model_text_res = model_transf_text(mod_final,  transfs =c(best_age_transf, best_edu_transf), 
                                      transfs.names=c("age_tr", "edu_tr"), new.names = c("Age", "Edu"))
   
+  #adj_text_res = model_transf_text(mod_final,  transfs =c(best_age_transf, best_edu_transf), 
+  #                                   transfs.names=c("age_tr", "edu_tr"), new.names = c("Age", "Edu"), means = c(age_m, edu_m), digits=3)
+  
   return(list(new.df = dat, lm.model = mod_final, transfs =c(best_age_transf, best_edu_transf),
               model_text = model_text_res))
   
