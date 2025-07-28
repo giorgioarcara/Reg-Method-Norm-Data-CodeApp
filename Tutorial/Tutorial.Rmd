@@ -1,8 +1,8 @@
 ---
 title: "Arcara 2024 - Regression Method<br>for normative data - Tutorial"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
   word_document: default
 date: "2025-07-16"
 ---
@@ -30,6 +30,7 @@ source("R_functions/transf_functions.R")
 source("R_functions/tolLimits.adjscores.R")
 source("R_functions/tolLimits.obs.R")
 source("R_functions/ES.R")
+source("R_functions/adj_scores_transf_text.R")
 
 ```
 
@@ -85,9 +86,9 @@ plot(allEffects(Test.ARC.res[[2]], partial.residuals=TRUE))
 ``` 
 
 
-* I can also print the final formula
+* I can also print the formula for adjusted scores (according to Capitani 1987 formulation)
 ```{r formula}
-print(Test.ARC.res$model_text)
+print(Test.ARC.res$adj_text)
 ```
 
 # Model diagnositc

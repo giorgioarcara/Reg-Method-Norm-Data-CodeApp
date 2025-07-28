@@ -153,6 +153,12 @@ adjscores_C1987 <- function(df = NULL, dep = "Dep", dep.range = c(0,30), age = "
     best_edu_transf = "zero"
   }
   
+  if (length(grep(sex, names(coef(mod_final)))) == 0){
+    best_sex_transf = "zero"
+  } else {best_sex_transf = "identity"}
+  
+  
+  
   
   ####
   # CAPITANI'S REGRESSION METHOD END HERE
@@ -185,6 +191,8 @@ adjscores_C1987 <- function(df = NULL, dep = "Dep", dep.range = c(0,30), age = "
   model_text_res = model_transf_text(mod_final,  transfs =c(best_age_transf, best_edu_transf), 
                                      transfs.names=c("age_tr", "edu_tr"), new.names = c("Age", "Edu"))
   
+  adj_text_res = adj_scores_transf_text(mod = mod_final, transfs =c(best_age_transf, best_edu_transf, best_sex_transf), var.names=c(age, edu, sex), dat=dat, t.means=c(age_m, edu_m, 0.5))
+  
   return(list(new.df = dat, lm.model = mod_final, transfs =c(best_age_transf, best_edu_transf),
-              model_text = model_text_res))
+              model_text = model_text_res, adj_text = adj_text_res))
 }

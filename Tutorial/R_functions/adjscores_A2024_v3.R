@@ -15,7 +15,7 @@
 # transfs = the two best transformations identified for age and education.
 # model_text = a text describing the best equation.
 
-# Author: Giorgio Arcara (2024) v 1.1
+# Author: Giorgio Arcara (2025) v 1.2
 
 
 adjscores_A2024 <- function(df = NULL, dep = "Dep", dep.range = c(0,30), age = "Age", edu="Education", sex="Sex"){
@@ -37,7 +37,7 @@ adjscores_A2024 <- function(df = NULL, dep = "Dep", dep.range = c(0,30), age = "
   dat$sex.or = dat$sex
   
   dat$sex= ifelse(dat$sex==levels(dat$sex)[1], 1, 0)
-  cat("Sex converted to numeric")
+  cat("Sex converted to numeric\n")
   }
   
   #compute most common transformations for age and education
@@ -179,10 +179,13 @@ adjscores_A2024 <- function(df = NULL, dep = "Dep", dep.range = c(0,30), age = "
   model_text_res = model_transf_text(mod_final,  transfs =c(best_age_transf, best_edu_transf), 
                                      transfs.names=c("age_tr", "edu_tr"), new.names = c("Age", "Edu"))
   
-  return(list(new.df = dat, lm.model = mod_final, transfs =c(best_age_transf, best_edu_transf),
-              model_text = model_text_res))
+  adj_text_res = adj_scores_transf_text(mod = mod_final, transfs =c(best_age_transf, best_edu_transf, best_sex_transf), var.names=c(age, edu, sex), dat=dat, t.means=c(age_m, edu_m, 0.5))
+
   
-  return(list(new.df = dat, lm.model = mod_final, transfs =c(best_age_transf, best_edu_transf), model_text = model_text_res))
+  
+  return(list(new.df = dat, lm.model = mod_final, transfs =c(best_age_transf, best_edu_transf),
+              model_text = model_text_res, adj_text = adj_text_res))
+  
 }
 
 
