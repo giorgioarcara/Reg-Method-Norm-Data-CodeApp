@@ -127,7 +127,7 @@ server <- function(input, output) {
             
             
             
-            adj_text = adj_scores_transf_text(dat.res$lm.model, transfs=dat.res$transfs, transfs.names = c("age_funct", "edu_funct"), new.names=c("Age", "Edu"), dat=dat)
+            adj_text = dat.res$adj_text
             assign("adj_text", adj_text, envir = .GlobalEnv)
             
             
