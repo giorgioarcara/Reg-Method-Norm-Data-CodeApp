@@ -27,14 +27,20 @@ adj_scores_transf_text = function(mod, transfs=NULL, transfs.names =NULL, var.na
   }
   
   
-#  if (length( grep(paste("^", sex.name, "$", sep=""), names(coefs))) > 0 ){
-#    t.means = c(t.means, 0.5)
-#  }
-    
+  #  if (length( grep(paste("^", sex.name, "$", sep=""), names(coefs))) > 0 ){
+  #    t.means = c(t.means, 0.5)
+  #  }
+  
   
   t.means=round(t.means, digits=digits)
-
+  
   model_res = NULL
+  
+  
+  if (length(coefs)==1){
+    model_res = "Adj score = Observed score" 
+  }
+  
   
   # proceed only if at least one coef is present   
   if (length(coefs)>1){
@@ -44,12 +50,12 @@ adj_scores_transf_text = function(mod, transfs=NULL, transfs.names =NULL, var.na
     coefs = coefs[!names(coefs)%in% c("(Intercept)")]
     
     for (iC in 1:length(coefs)){
-
-            # case first or middle terms
+      
+      # case first or middle terms
       if (iC != length(coefs)){
         
         
-      model_res = paste(model_res,  signif(as.numeric(coefs[iC]),digits=digits), " * (", 
+        model_res = paste(model_res,  signif(as.numeric(coefs[iC]),digits=digits), " * (", 
                           transfs[iC], "(", var.names[iC], ") - ", t.means[iC], ")", " + ", sep="")}
       # case last terms
       if (iC == length(coefs)){
@@ -57,20 +63,17 @@ adj_scores_transf_text = function(mod, transfs=NULL, transfs.names =NULL, var.na
                           transfs[iC], "(", var.names[iC], ") - ", t.means[iC], ")", sep="")}
       
       if (!is.null(new.names)){
-      for (iN in 1:length(transfs.names))
-        model_res=gsub(transfs.names[iN], 
-                       paste(transfs[iN], "(",new.names[iN], ")", sep=""), model_res)
+        for (iN in 1:length(transfs.names))
+          model_res=gsub(transfs.names[iN], 
+                         paste(transfs[iN], "(",new.names[iN], ")", sep=""), model_res)
       }
     }
     model_res = paste("Adjusted score = Observed score - [ ", model_res, " ]", sep="")
+    
+    # trick to adjust formula (if +- is foudn, substitute with -)
+    model_res = gsub("\\+ \\-", "\\-", model_res)
   }
   
-  # trick to adjust formula (if +- is foudn, substitute with -)
-  model_res = gsub("\\+ \\-", "\\-", model_res)
-
-  if (length(coefs)==1){
-    model_res = "Adj score = Observed score" 
-  }
   
   return(model_res)
 }
