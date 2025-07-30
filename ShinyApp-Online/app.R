@@ -67,7 +67,7 @@ ui <- fluidPage(
                       "<li><code>Sex</code> as either 0 or 1. E.g. 0 for Males, and 1 for Females.</li>", 
                       "<li><code>Score</code> as a numerical variable</li>"),
                  HTML("<br><b>NOTE</b>: <br> - If you use the regression method script please cite: Arcara G. (2024) Improving Equivalent Scores: A new method for regression model selection.<i>Neurological Sciences, 45(12),</i> 5685-5695<br> - If you also use the ES, please add: <i> Aiello, E. N., & Depaoli, E. G. (2022)...</i>"),
-                 HTML("<br><br><b>WARNING</b>: Proper regression modeling should also include diagnostic inspection. Please check that the fit is appropriate checking the Model Diagnostics Tab.<br>"),
+                 HTML("<br><br><b>WARNING</b>: Regression modeling should always include diagnostic inspection. Please check that the fit is appropriate checking the Model Diagnostics Tab."),
                  HTML(paste("<i>Last modification:", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"),"</i>"))
         ),
         
@@ -95,14 +95,28 @@ ui <- fluidPage(
     es_res <- reactiveVal(NULL)
     
     observeEvent(input$action_1, {
-      req(input$file1)
-      req(!is.na(input$min_val), !is.na(input$max_val))
       
-      dat <- data_raw()
+      # Validate input file
+      if (is.null(input$file1)) {
+        showModal(modalDialog(
+          title = "Missing Input",
+          "Please upload a CSV file and set both minimum and maximum score values before calculating.",
+          easyClose = TRUE,
+          footer = modalButton("OK")
+        ))
+        return()
+      }
       
-      # Check column names
+      # Validate min and max score values
+      if (is.na(input$min_val) || is.na(input$max_val)) {
+        showNotification("⚠ Please enter both minimum and maximum score values.", type = "error")
+        return()
+      }
+      
+      dat <- read.csv(input$file1$datapath)
+      
       if (!all(c("Age", "Education", "Sex", "Score") %in% colnames(dat))) {
-        showNotification("CSV must contain columns: Age, Education, Sex, Score", type = "error")
+        showNotification("⚠ File must contain columns: Age, Education, Sex, Score", type = "error")
         return()
       }
       
