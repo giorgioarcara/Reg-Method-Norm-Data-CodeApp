@@ -51,23 +51,37 @@ ui <- fluidPage(
         "A .csv file will be saved on your computer")
     ),
     mainPanel(
-      htmlOutput("result2"),
-      br(),
-      plotOutput("result1"),
-      htmlOutput("result3"),
-      br(),
-      htmlOutput("result4"),
-      br(),
-      HTML("This shiny app accompanies the article  Arcara G. (2024) 'Improving Equivalent Scores: a new regression method'<br><br>"),
-      HTML("<b>Instructions</b>: The .CSV File supplied should have <code>,</code> as delimiter and should include the following columns:<br>",
-           "<li><code>Age</code>", "should be a numerical variable</li>",
-           "<li><code>Education</code> as a numerical variable</li>",
-           "<li><code>Sex</code> as either 0 or 1. E.g. 0 for Males, and 1 for Females. The mapping of values (e.g., which number corresponds to which sex) should be defined clearly in your documentation or data processing pipeline.</li>", 
-           "<li><code>Score</code> as a numerical variable</li>"),
-      HTML("<br><b>NOTE</b>: <br> - If you use the regression method script please cite: Arcara G. (2024) Improving Equivalent Scores: A new method for regression model selection.<i>Neurological Sciences, 45(12),</i> 5685-5695<br> - If you also use the ES, please add: <i> Aiello, E. N., & Depaoli, E. G. (2022). Norms and standardizations in neuropsychology via equivalent scores: software solutions and practical guides. Neurological Sciences, 43(2), 961-966. </i>"),
-      HTML("<br><br><b>WARNING</b>: Proper regression modeling should also include diagnostic inspection. Please check that the fit is appropriate.<br>"),
-      HTML(paste("<i>Last modification:", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"),"</i>"))
-    ),
+      tabsetPanel(
+        tabPanel("Results",
+                 htmlOutput("result2"),
+                 br(),
+                 plotOutput("result1"),
+                 htmlOutput("result3"),
+                 br(),
+                 htmlOutput("result4"),
+                 br(),
+                 HTML("This shiny app accompanies the article  Arcara G. (2024) 'Improving Equivalent Scores: a new regression method'<br><br>"),
+                 HTML("<b>Instructions</b>: The .CSV File supplied should have <code>,</code> as delimiter and should include the following columns:<br>",
+                      "<li><code>Age</code>", "should be a numerical variable</li>",
+                      "<li><code>Education</code> as a numerical variable</li>",
+                      "<li><code>Sex</code> as either 0 or 1. E.g. 0 for Males, and 1 for Females.</li>", 
+                      "<li><code>Score</code> as a numerical variable</li>"),
+                 HTML("<br><b>NOTE</b>: <br> - If you use the regression method script please cite: Arcara G. (2024) Improving Equivalent Scores: A new method for regression model selection.<i>Neurological Sciences, 45(12),</i> 5685-5695<br> - If you also use the ES, please add: <i> Aiello, E. N., & Depaoli, E. G. (2022)...</i>"),
+                 HTML("<br><br><b>WARNING</b>: Proper regression modeling should also include diagnostic inspection. Please check that the fit is appropriate.<br>"),
+                 HTML(paste("<i>Last modification:", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"),"</i>"))
+        ),
+        
+        tabPanel("Model Diagnostics",
+                 h4("Diagnostic Plots for Regression Model"),
+                 #p("These plots are based on the fitted model (`dat.lm`)."),
+                 plotOutput("diag_resid_fitted"),
+                 plotOutput("diag_qq"),
+                 plotOutput("diag_scale_location"),
+                 plotOutput("diag_cooks")
+        )
+      )
+    )
+    ,
   )
 )
 
@@ -150,6 +164,33 @@ server <- function(input, output) {
             output$result4 <- renderTable({ 
               ES.adj
             }, rownames=T)
+            
+            
+            # Diagnostics tab plots
+            output$diag_resid_fitted <- renderPlot({
+              plot(dat.lm$fitted.values, resid(dat.lm), 
+                   xlab = "Fitted values", ylab = "Residuals",
+                   main = "Residuals vs Fitted")
+              abline(h = 0, col = "red")
+            })
+            
+            output$diag_qq <- renderPlot({
+              qqnorm(resid(dat.lm))
+              qqline(resid(dat.lm), col = "red")
+            })
+            
+            output$diag_scale_location <- renderPlot({
+              sqrt_abs_resid <- sqrt(abs(resid(dat.lm)))
+              plot(dat.lm$fitted.values, sqrt_abs_resid, 
+                   xlab = "Fitted values", ylab = "Sqrt(|Residuals|)",
+                   main = "Scale-Location")
+              abline(h = 0, col = "red")
+            })
+            
+            output$diag_cooks <- renderPlot({
+              plot(cooks.distance(dat.lm), type = "h",
+                   main = "Cook's Distance", ylab = "Distance")
+            })
             
             
             
