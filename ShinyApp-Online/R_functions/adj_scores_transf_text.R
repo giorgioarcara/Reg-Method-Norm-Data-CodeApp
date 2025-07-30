@@ -49,12 +49,12 @@ adj_scores_transf_text = function(mod, transfs=NULL, transfs.names =NULL, var.na
       if (iC != length(coefs)){
         
         
-      model_res = paste(model_res,  signif(as.numeric(coefs[iC]),digits=digits), " * ", 
-                          transfs[iC], "(", var.names[iC], " - ", t.means[iC], ")", " + ", sep="")}
+      model_res = paste(model_res,  signif(as.numeric(coefs[iC]),digits=digits), " * (", 
+                          transfs[iC], "(", var.names[iC], ") - ", t.means[iC], ")", " + ", sep="")}
       # case last terms
       if (iC == length(coefs)){
-        model_res = paste(model_res,  signif(as.numeric(coefs[iC]),digits=digits), " * ", 
-                          transfs[iC], "(", var.names[iC], " - ", t.means[iC], ")", sep="")}
+        model_res = paste(model_res,  signif(as.numeric(coefs[iC]),digits=digits), " * (", 
+                          transfs[iC], "(", var.names[iC], ") - ", t.means[iC], ")", sep="")}
       
       if (!is.null(new.names)){
       for (iN in 1:length(transfs.names))
