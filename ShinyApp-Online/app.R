@@ -143,7 +143,7 @@ ui <- fluidPage(
       } else {
         dat.lm <- model_fit()
         par(mar = c(10, 2, 10, 2))
-        plot(allEffects(dat.lm, partial.residuals = TRUE), residuals.cex = 0.2)
+        plot(allEffects(dat.lm, partial.residuals = TRUE), residuals.cex = 0.5, residuals.pch=19)
       }
     })
     
@@ -204,14 +204,14 @@ ui <- fluidPage(
     output$diag_resid_fitted <- renderPlot({
       req(model_fit())
       plot(model_fit()$fitted.values, resid(model_fit()),
-           xlab = "Fitted values", ylab = "Residuals",
+           xlab = "Fitted values", ylab = "Residuals", col = "orange", pch=19,
            main = "Residuals vs Fitted")
       abline(h = 0, col = "red")
     })
     
     output$diag_qq <- renderPlot({
       req(model_fit())
-      qqnorm(resid(model_fit()))
+      qqnorm(resid(model_fit()), col = "orange", pch=19)
       qqline(resid(model_fit()), col = "red")
     })
     
@@ -219,7 +219,7 @@ ui <- fluidPage(
       req(model_fit())
       sqrt_abs_resid <- sqrt(abs(resid(model_fit())))
       plot(model_fit()$fitted.values, sqrt_abs_resid,
-           xlab = "Fitted values", ylab = "Sqrt(|Residuals|)",
+           xlab = "Fitted values", ylab = "Sqrt(|Residuals|)", col = "orange", pch=19,
            main = "Scale-Location")
       abline(h = 0, col = "red")
     })
