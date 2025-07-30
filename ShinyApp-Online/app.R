@@ -51,144 +51,224 @@ ui <- fluidPage(
         "A .csv file will be saved on your computer")
     ),
     mainPanel(
-      htmlOutput("result2"),
-      br(),
-      plotOutput("result1"),
-      htmlOutput("result3"),
-      br(),
-      htmlOutput("result4"),
-      br(),
-      HTML("This shiny app accompanies the article  Arcara G. (2024) 'Improving Equivalent Scores: a new regression method'<br><br>"),
-      HTML("<b>Instructions</b>: The .CSV File supplied should have <code>,</code> as delimiter and should include the following columns:<br>",
-           "<li><code>Age</code>", "should be a numerical variable</li>",
-           "<li><code>Education</code> as a numerical variable</li>",
-           "<li><code>Sex</code> as either 0 or 1. E.g. 0 for Males, and 1 for Females. The mapping of values (e.g., which number corresponds to which sex) should be defined clearly in your documentation or data processing pipeline.</li>", 
-           "<li><code>Score</code> as a numerical variable</li>"),
-      HTML("<br><b>NOTE</b>: <br> - If you use the regression method script please cite: Arcara G. (2024) Improving Equivalent Scores: A new method for regression model selection.<i>Neurological Sciences, 45(12),</i> 5685-5695<br> - If you also use the ES, please add: <i> Aiello, E. N., & Depaoli, E. G. (2022). Norms and standardizations in neuropsychology via equivalent scores: software solutions and practical guides. Neurological Sciences, 43(2), 961-966. </i>"),
-      HTML("<br><br><b>WARNING</b>: Proper regression modeling should also include diagnostic inspection. Please check that the fit is appropriate.<br>"),
-      HTML(paste("<i>Last modification:", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"),"</i>"))
-    ),
+      tabsetPanel(
+        tabPanel("Results",
+                 htmlOutput("result2"),
+                 br(),
+                 plotOutput("result1"),
+                 htmlOutput("result3"),
+                 br(),
+                 htmlOutput("result4"),
+                 br(),
+                 HTML("This shiny app accompanies the article  Arcara G. (2024) 'Improving Equivalent Scores: a new regression method'<br><br>"),
+                 HTML("<b>Instructions</b>: The .CSV File supplied should have <code>,</code> as delimiter and should include the following columns:<br>",
+                      "<li><code>Age</code>", "should be a numerical variable</li>",
+                      "<li><code>Education</code> as a numerical variable</li>",
+                      "<li><code>Sex</code> as either 0 or 1. E.g. 0 for Males, and 1 for Females.</li>", 
+                      "<li><code>Score</code> as a numerical variable</li>"),
+                 HTML("<br><b>NOTE</b>: <br> - If you use the regression method script please cite: Arcara G. (2024) Improving Equivalent Scores: A new method for regression model selection.<i>Neurological Sciences, 45(12),</i> 5685-5695<br> - If you also use the ES, please add: <i> Aiello, E. N., & Depaoli, E. G. (2022)...</i>"),
+                 HTML("<br><br><b>WARNING</b>: Regression modeling should always include diagnostic inspection. Please check that the fit is appropriate checking the Model Diagnostics Tab."),
+                 HTML(paste("<i>Last modification:", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"),"</i>"))
+        ),
+        
+        tabPanel("Model Diagnostics",
+                 h4("Diagnostic Plots for Regression Model"),
+                 uiOutput("diagnostics_ui")
+        ),
+      )
+    )
   )
 )
-
-
-server <- function(input, output) {
   
-  result <- reactiveVal()
-  observeEvent(input$action_1, { result(1)})
-  observeEvent(input$action_2, { result(2) })
-  
-  # MAIN PANEL 2 (PLOT)
-  output$result1 <- renderPlot({
+  server <- function(input, output) {
     
+    result <- reactiveVal(NULL)
+    data_raw <- reactive({
+      req(input$file1)
+      read.csv(input$file1$datapath)
+    })
     
-    # default result is Null. It would return an error
-    if (!is.null(result())){ 
+    dat_res <- reactiveVal(NULL)
+    model_fit <- reactiveVal(NULL)
+    adj_text <- reactiveVal(NULL)
+    es_adj <- reactiveVal(NULL)
+    es_res <- reactiveVal(NULL)
+    
+    observeEvent(input$action_1, {
       
-      
-      # INPUT BUTTON
-      if (result()==1){
-        
-        if (is.null(input$file1)){
-          #plot(rnorm(10))
-          plot(0, type="n", xlab="", ylab="", axes=F, xlim=c(-1, 1), ylim=c(-1,1))
-          text(0, 0, labels="Before calculating the results\n you need to upload a valid .csv file", cex=1.5, font=2) # 
-        }
-        
-        if ((is.na(input$max_val)|is.na(input$min_val)) & !is.null(input$file1)){
-          #plot(rnorm(10))
-          plot(0, type="n", xlab="", ylab="", axes=F, xlim=c(-1, 1), ylim=c(-1,1))
-          text(0, 0, labels="Before calculating the results, please specify\n the minimumn and maximum observable Score values", cex=1.5, font=2) # 
-        } 
-        
-        if (!(is.na(input$max_val)|is.na(input$min_val)) & !is.null(input$file1)){
-          
-          
-          dat = read.csv(input$file1$datapath)
-          if (length(setdiff(c("Age", "Education", "Sex", "Score"), names(dat))) > 0 ){
-            plot(NA, axes=F, frame.plot=F, ylab="", xlab="", xlim=c(-1,1), ylim=c(-1,1))
-            text(0,0, "The file is not appropriate.\n Check the instructions\n", cex=1.5, font=2)
-            text(0,-0.5, "The file column names should be: Age, Education, Sex, and Score", cex=1.5, font=1)
-            text(0,-1, "The .csv file must have comma ',' as field delimiter", cex=1.5, font=1)
-            
-            
-          } else {
-            plot(NA, axes=F, frame.plot=F, ylab="", xlab="", xlim=c(-1,1), ylim=c(-1,1))
-            
-            dat.res = adjscores_A2024(df = dat, dep="Score", age="Age", edu="Education", sex="Sex", dep.range = c(input$min_val, input$max_val))
-            assign("dat.res", dat.res, envir=.GlobalEnv)
-            
-            ES.res = ES(adjscores = dat.res$new.df$ADJ_SCORES)
-            ES.adj = as.data.frame(t(ES.res$Adjusted_Scores))
-            row.names(ES.adj)="Adjusted Score"
-            assign("ES.adj", ES.adj, envir=.GlobalEnv)
-            assign("ES.res", ES.res, envir=.GlobalEnv)
-            
-            
-            
-            
-            adj_text = dat.res$adj_text
-            assign("adj_text", adj_text, envir = .GlobalEnv)
-            
-            
-            dat.lm = dat.res$lm.model        
-            par(mar=c(10,2,10,2))
-            plot(allEffects(dat.lm, partial.residuals=T), residuals.cex=0.2)
-            
-            
-            # MAIN PANEL 1 (TEXT) # note, it should be here cause it use dat.res, which is created above
-            output$result2 <- renderText({ 
-              paste('<b><font size="3"> Regression function : ',as.character(dat.res$model_text), '</b></font> <br>')
-            })
-            
-            # MAIN PANEL 3 (ADJUSTED SCORES FORMLA)
-            output$result3 <- renderText({ 
-              paste('<b><font size="3">',  adj_text, '</b></font> <br>')
-            })
-            
-            # MAIN PANEL 4 (EQUIVALENT SCORES)
-            output$result4 <- renderTable({ 
-              ES.adj
-            }, rownames=T)
-            
-            
-            
-          }
-        }
-      }
-    }    
-  })
-  
-  
-  
-  
-  
-  
-  #### 
-  output$downloadData <- downloadHandler(
-    filename = "Reg-Method_Exported_Results.txt",
-    content = function(file){# Write the dataset to the `file` that will be downloaded
-      
-      if(!exists("dat.res")){
-        write("It seems you tried to export a .csv before uploading the data and/or computing the results. Please upload a valid .csv file and follow the steps before exporting the data.", file)
-        
-      } else{
-        
-        write(paste("Regression function :", as.character(dat.res$model_text), sep=""), file)
-        write(adj_text, file, append = T)
-        write("\n", file, append = T)
-        write(paste(names(ES.res$Adjusted_Scores), collapse="\t"), file, append = T)
-        write(ES.res$Adjusted_Scores, file, append = T)
-        
-        citation="\n\nNOTE:\n - If you use the regression method script please cite: Arcara G. (2024) Improving Equivalent Scores: A new method for regression model selection\n - If you use the ES, please cite: Aiello, E. N., & Depaoli, E. G. (2022). Norms and standardizations in neuropsychology via equivalent scores: software solutions and practical guides. Neurological Sciences, 43(2), 961-966. "
-        warning = "\n WARNING: Proper regression modeling should also include diagnostic inspection. Please check that the fit is appropriate."
-        
-        write(citation, file, append=T)      
-        write(warning, file, append=T)  
+      # Validate input file
+      if (is.null(input$file1)) {
+        showModal(modalDialog(
+          title = "Missing Input",
+          "Please upload a CSV file and set both minimum and maximum score values before calculating.",
+          easyClose = TRUE,
+          footer = modalButton("OK")
+        ))
+        return()
       }
       
-    }
-  )
+      # Validate min and max score values
+      if (is.na(input$min_val) || is.na(input$max_val)) {
+        showNotification("⚠ Please enter both minimum and maximum score values.", type = "error")
+        return()
+      }
+      
+      dat <- read.csv(input$file1$datapath)
+      
+      if (!all(c("Age", "Education", "Sex", "Score") %in% colnames(dat))) {
+        showNotification("⚠ File must contain columns: Age, Education, Sex, Score", type = "error")
+        return()
+      }
+      
+      datres <- adjscores_A2024(df = dat, dep = "Score", age = "Age", edu = "Education", sex = "Sex", dep.range = c(input$min_val, input$max_val))
+      dat_res(datres)
+      model_fit(datres$lm.model)
+      adj_text(datres$adj_text)
+      
+      esr <- ES(adjscores = datres$new.df$ADJ_SCORES)
+      es_adj(as.data.frame(t(esr$Adjusted_Scores)))
+      es_res(esr)
+      
+      result(TRUE)
+    })
+    
+    ## OUTPUTS
+    
+    output$result1 <- renderPlot({
+      req(result())
+      
+      if (is.null(dat_res())) {
+        plot(0, 0, type = "n", xlab = "", ylab = "", axes = FALSE)
+        text(0, 0, "Model not calculated.\nUpload file and click 'Calculate results'", cex = 1.5)
+      } else {
+        dat.lm <- model_fit()
+        par(mar = c(10, 2, 10, 2))
+        plot(allEffects(dat.lm, partial.residuals = TRUE), residuals.cex = 0.5, residuals.pch=19)
+      }
+    })
+    
+    output$result2 <- renderText({
+      req(dat_res())
+      paste('<b><font size="3"> Regression function : ', as.character(dat_res()$model_text), '</b></font> <br>')
+    })
+    
+    output$result3 <- renderText({
+      req(adj_text())
+      paste('<b><font size="3">', adj_text(), '</b></font> <br>')
+    })
+    
+    output$result4 <- renderTable({
+      req(es_adj())
+      es_adj()
+    }, rownames = TRUE)
+    
+    
+    # Model Diagnostics tab ----
+    output$diagnostics_ui <- renderUI({
+      if (is.null(model_fit())) {
+        return(
+          div(
+            style = "padding: 20px; font-size: 16px;",
+            strong("⚠ Please upload data and calculate the model to view diagnostics.")
+          )
+        )
+      }
+      
+      # Show diagnostic plots if model exists
+      tagList(
+        tagList(
+          plotOutput("diag_resid_fitted"),
+          p(em("A good fit shows residuals scattered randomly around zero without a pattern.")),
+          br(),
+          plotOutput("diag_qq"),
+          p(em("Points should fall approximately along the line, indicating normally distributed residuals.")),
+          br(),
+          plotOutput("diag_resid_hist"),
+          p(em("Residuals should resemble a bell curve; deviations suggest non-normality.")),
+          br(),
+          plotOutput("diag_scale_location"),
+          p(em("A good fit has a horizontal line with equally spread points, showing constant variance."))
+          
+         # plotOutput("diag_cooks"),
+          # p(em("Most values should be small; large spikes may indicate influential data points.")),
+          
+        )
+      )
+    })
+    
+    
+    observe({
+      req(model_fit())
+    })
+    
+    output$diag_resid_fitted <- renderPlot({
+      req(model_fit())
+      plot(model_fit()$fitted.values, resid(model_fit()),
+           xlab = "Fitted values", ylab = "Residuals", col = "orange", pch=19,
+           main = "Residuals vs Fitted")
+      abline(h = 0, col = "red")
+    })
+    
+    output$diag_qq <- renderPlot({
+      req(model_fit())
+      qqnorm(resid(model_fit()), col = "orange", pch=19)
+      qqline(resid(model_fit()), col = "red")
+    })
+    
+    output$diag_scale_location <- renderPlot({
+      req(model_fit())
+      sqrt_abs_resid <- sqrt(abs(resid(model_fit())))
+      plot(model_fit()$fitted.values, sqrt_abs_resid,
+           xlab = "Fitted values", ylab = "Sqrt(|Residuals|)", col = "orange", pch=19,
+           main = "Scale-Location")
+      abline(h = 0, col = "red")
+    })
+    
+    output$diag_cooks <- renderPlot({
+      req(model_fit())
+      plot(cooks.distance(model_fit()), type = "h",
+           main = "Cook's Distance", ylab = "Distance")
+    })
+    
+    output$diag_resid_hist <- renderPlot({
+      req(model_fit())
+      res <- resid(model_fit())
+      
+      hist(res,
+           probability = TRUE,
+           breaks = 20,
+           col = "lightblue",
+           border = "white",
+           main = "Histogram of Residuals with Normal Curve",
+           xlab = "Residuals")
+      
+      # Add normal curve
+      xfit <- seq(min(res), max(res), length = 100)
+      yfit <- dnorm(xfit, mean = mean(res), sd = sd(res))
+      lines(xfit, yfit, col = "red", lwd = 2)
+    })
+    
+    # Export button
+    output$downloadData <- downloadHandler(
+      filename = "Reg-Method_Exported_Results.txt",
+      content = function(file) {
+        if (is.null(dat_res()) || is.null(es_res())) {
+          write("Model not calculated yet. Upload a valid file and calculate first.", file)
+        } else {
+          write(paste("Regression function :", as.character(dat_res()$model_text), sep = ""), file)
+          write(adj_text(), file, append = TRUE)
+          write("\n", file, append = TRUE)
+          write(paste(names(es_res()$Adjusted_Scores), collapse = "\t"), file, append = TRUE)
+          write(es_res()$Adjusted_Scores, file, append = TRUE)
+          
+          citation <- "\n\nNOTE:\n - If you use the regression method script please cite: Arcara G. (2024)..."
+          warning <- "\n WARNING: Proper regression modeling should also include diagnostic inspection."
+          
+          write(citation, file, append = TRUE)
+          write(warning, file, append = TRUE)
+        }
+      }
+    )
+  }
   
-}
-shinyApp(ui, server)
+  shinyApp(ui, server)
