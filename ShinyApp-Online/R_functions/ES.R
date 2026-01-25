@@ -4,7 +4,8 @@
 # adjscores = the adjusted scores as calculated from a regression based model.
 
 
-# Author Giorgio Arcara (2023) v.1.0 , adapted from Aiello e Depaoli (2022)
+# Author Giorgio Arcara (2026) v.1.1 , adapted from Aiello e Depaoli (2022)
+# log . fixed work for reversing.
 
 ES <- function(n=NULL, adjscores=NULL, lower_tail = TRUE){
   
@@ -13,7 +14,7 @@ ES <- function(n=NULL, adjscores=NULL, lower_tail = TRUE){
   }
   
   if (!is.null(adjscores)){
-    dat = data.frame(AS = adjscores)
+    dat = data.frame(AS = sort(adjscores)) # note that I sort here otherwise the reversing (below) will not work
     n = dim(dat)[1]
   }
   
@@ -29,19 +30,19 @@ ES <- function(n=NULL, adjscores=NULL, lower_tail = TRUE){
   z1_3 <- z1/3
   z1_2 <- z1_3*2
   
-  cd2 <- pnorm(z1_2, lower.tail = lower_tail)
+  cd2 <- pnorm(z1_2)
   a <- (cd1-cd2)*n
   a_r <- round(a)
   ES1 <- -a_r+oTL
   
   
-  cd3 <- pnorm(z1_3, lower.tail = lower_tail)
+  cd3 <- pnorm(z1_3)
   b <- (cd3-cd2)*n
   b_r <- round(b)
   ES2 <- ES1+b_r
   
   
-  cd4 <- pnorm(0, lower.tail = lower_tail)
+  cd4 <- pnorm(0)
   c <- (cd4-cd3)*n
   c_r <- round(c)
   ES3 <- ES2+c_r
@@ -51,13 +52,15 @@ ES <- function(n=NULL, adjscores=NULL, lower_tail = TRUE){
   
   if (!is.null(adjscores)){
     
-    dat$ranked_AS = rank(dat$AS)
-    
-    if (!lower_tail){
-      dat$ranked_AS = rev(dat$ranked_AS)
+    if (lower_tail){
+      dat$ranked_AS = rank(dat$AS)
     }
     
-    dat = dat[order(dat$AS), ]
+    if (!lower_tail){
+      dat$ranked_AS = rev(rank(dat$AS))
+    }
+    
+    dat = dat[order(dat$ranked_AS), ]
     ES.s = unlist(dat[ES.n, "AS"])
     names(ES.s)=c("ES0(oTL)-ES1", "ES1-ES2", "ES2-ES3", "ES3-ES4")
     

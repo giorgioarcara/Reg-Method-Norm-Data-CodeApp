@@ -19,7 +19,7 @@ This tutorials explain how to use the code for applying the method in *Arcara G.
 To work with the method you need to load some functions that will be used. Here I included all the required functions in a folder called `R functions` (these will be wrapped in an R package in the future).
 
 ```{r wd, echo=FALSE}
-setwd( "/Users/giorgioarcara/Documents/Lavori Personali/Improving ES/Reg-Method-Norm-Data-CodeApp/")
+setwd( "/Users/giorgioarcara/Documents/Projects/2024 - Improving ES/Reg-Method-Norm-Data-CodeApp")
 ```
 
 ```{r functions}
