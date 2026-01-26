@@ -5,7 +5,7 @@
 
 
 # Author Giorgio Arcara (2026) v.1.1 , adapted from Aiello e Depaoli (2022)
-# log . fixed work for reversing.
+# - fixed how reversing scores work.
 
 ES <- function(n=NULL, adjscores=NULL, lower_tail = TRUE){
   
