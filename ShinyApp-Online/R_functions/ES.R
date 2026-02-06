@@ -4,8 +4,9 @@
 # adjscores = the adjusted scores as calculated from a regression based model.
 
 
-# Author Giorgio Arcara (2026) v.1.1 , adapted from Aiello e Depaoli (2022)
+# Author Giorgio Arcara (2026) v.1.2 , adapted from Aiello e Depaoli (2022)
 # - fixed how reversing scores work.
+# - the function now works by sorting all observation (ranks not used)
 
 ES <- function(n=NULL, adjscores=NULL, lower_tail = TRUE){
   
@@ -53,14 +54,12 @@ ES <- function(n=NULL, adjscores=NULL, lower_tail = TRUE){
   if (!is.null(adjscores)){
     
     if (lower_tail){
-      dat$ranked_AS = rank(dat$AS)
+      dat$sorted_AS = 1:nrow(dat)  
+    } else {
+      dat$sorted_AS = nrow(dat):1
     }
-    
-    if (!lower_tail){
-      dat$ranked_AS = rev(rank(dat$AS))
-    }
-    
-    dat = dat[order(dat$ranked_AS), ]
+
+    dat = dat[order(dat$sorted_AS), ]
     ES.s = unlist(dat[ES.n, "AS"])
     names(ES.s)=c("ES0(oTL)-ES1", "ES1-ES2", "ES2-ES3", "ES3-ES4")
     
